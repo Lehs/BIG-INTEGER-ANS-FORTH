@@ -11,7 +11,7 @@ base @ hex
  : u2/ 1 rshift ;
  : u/ 0 swap um/mod nip ;
  : umod 0 swap um/mod drop ;
-\ : cell- cell - ;
+ : cell- cell - ;
 
 : d256*  \ ud -- 256ud
   over 8 lshift rot 0FF000000 and 018 rshift
@@ -140,10 +140,10 @@ pad1 + cell - constant pad2
 vst! 	\ initialize stack för dynamical numbers
 
 : nextfree ( -- a )  bvp @ @ ;
-: first ( -- a )  bvp @ cell + @ ;			\ big on tos
-: second ( -- a )  bvp @ 2 cells + @ ;	\ big on second
-: third ( -- a )  bvp @ 3 cells + @ ;	\ big on third
-: vp+ ( -- )  -cell bvp +! ;					\ stack pointer
+: first ( -- a )  bvp @ cell + @ ;		\ big on tos
+: second ( -- a )  bvp @ 2 cells + @ ;		\ big on second
+: third ( -- a )  bvp @ 3 cells + @ ;		\ big on third
+: vp+ ( -- )  -cell bvp +! ;			\ stack pointer
 
 : tov \ ad --		ad of number array to stack
   vp+ bvp @ ! ;
@@ -242,7 +242,7 @@ vst! 	\ initialize stack för dynamical numbers
 
 : reztop  top$ xpush bdrop bx> ;       	\ clean leading asczeros
 : vzero  [char] 0 nextfree tuck c! 1+ tov ;
-: bzero 0 vdigit ;			                \ small bigintegers
+: bzero 0 vdigit ;			\ small bigintegers
 : bone  1 vdigit ;
 : btwo  2 vdigit ;
 : bthree 3 vdigit ;
@@ -343,8 +343,8 @@ vst! 	\ initialize stack för dynamical numbers
   then bdrop ;
 
 : v  bl parse vpush ; 		\ 'v 12345' put asc numb on tos
-: b  v v>b ;			         \ put bigint on tos 
-: cl vst! xst! ;		       \ clear stacks
+: b  v v>b ;			\ put bigint on tos 
+: cl vst! xst! ;		\ clear stacks
 
 : .v  cr bdepth ?dup		\ print asc numb stack
   if 0 do i nth i len# type cr loop then ;
@@ -444,8 +444,8 @@ vst! 	\ initialize stack för dynamical numbers
   if nip first dup rot cells 
      dup >xs + len1 cmove> 
      xs@ bvp @ +! first xs> erase exit
-  then cells >ys				                        \ i  y=4[n/32]
-  ys@ first dup >xs + 			                   \ i f+4[n/32]  x=first
+  then cells >ys				    \ i  y=4[n/32]
+  ys@ first dup >xs + 			            \ i f+4[n/32]  x=first
   xs@ over len1 dup >zs cmove>		            \ i f+4[n/32]  z=len1
   xs@ ys@ erase
   zs> over + dup xs! swap 0 >zs		            \ i f+4[n/32]+len1 f+4[n/32]
@@ -507,7 +507,7 @@ vst! 	\ initialize stack för dynamical numbers
 : blog~2 \ u v -- u v | -- n 
   len2 z#2 - 1- 3 lshift msb@2 log~ + ;
 
-: blog \ v -- | -- n	\ integer part of 2-logarithm
+: blog \ v -- | -- n	 integer part of 2-logarithm
   blog~ 1- bdrop ;
 
 : b1+ bone b+ ;
@@ -807,15 +807,15 @@ variable foo
        1 of false endof
        4 of false endof
        7 of false endof
-			dup of true  endof
+     dup of true  endof
   endcase ;
 
 : sieve16 \ v -- v | -- f
   first @ 0F and
   case 	0 of false endof
-				1 of false endof
-				4 of false endof
-				9 of false endof
+	1 of false endof
+	4 of false endof
+	9 of false endof
       	dup of  true endof
   endcase ;
 
