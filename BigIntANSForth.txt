@@ -12,6 +12,7 @@ base @ hex
  : u/ 0 swap um/mod nip ;
  : umod 0 swap um/mod drop ;
  : cell- cell - ;
+ : rdrop r> drop ;
 
 : d256*  \ ud -- 256ud
   over 8 lshift rot 0FF000000 and 018 rshift
@@ -610,7 +611,7 @@ variable foo
 1k bvariable bar
 1k bvariable den
 
-: barmod \ w -- v			w < u**2
+: barmod \ w -- v		v= w mod den, w < den^2
   bdup bar b@ br< 
   if bdrop bdrop exit 
   then b* foo @ brshift      \ w q
