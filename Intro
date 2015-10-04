@@ -18,7 +18,7 @@ for garbage collection.
 
 The buffers of the stacks and the pads are the only limits:
 
-b 2000 bfaculty cr b.
+b 2000 bfaculty cr b. 
 
 instantly fills the screen with about 5700 decimal digits, but that's just about the limit with the original settings.
 
