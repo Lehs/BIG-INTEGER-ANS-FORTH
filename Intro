@@ -1,14 +1,20 @@
 Introduction to BigInt
 
-The prefix b stands for big (unsigned) integer, in br the r stands for remain, that is, the bignum values on the stack remain, eventually under return values on the topp of the stack, and bs refer to mixed input of singles and bigs. Otherwise  there is an analogy with floats and the prefix f. And as for floats there is a special stack, independent of the parameter stack.
+The prefix b stands for big (unsigned) integer, in br the r stands for remain, that is, the bignum values on the stack remain, 
+eventually under return values on the topp of the stack, and bs refer to mixed input of singles and bigs. Otherwise  there is 
+an analogy with floats and the prefix f. And as for floats there is a special stack, independent of the parameter stack.
 
 The b-stack is really two stacks:
 
 One for references in highmem of an allocated buffer, starting at v$0 and ending at b0 - 1, growing towards lowmem;
 
-One for cell-strings in lowmem, blocks of cells representing the bignum growing towards highmem, representing a bignum with lower significant cells in lower memory.
+One for cell-strings in lowmem, blocks of cells representing the bignum growing towards highmem, representing a bignum with 
+lower significant cells in lower memory.
 
-Stack manipulations as bdup and bover creates new references to new copies of cell strings. It would be faster to only manipulate references, but when changing the bignumber i.e. with b1+ it would be necesary any way to first make a new copy and then change the reference. Instead, here all copies are created automatic in the first place. A simple solution with no need for garbage collection.
+Stack manipulations as bdup and bover creates new references to new copies of cell strings. It would be faster to only 
+manipulate references, but when changing the bignumber i.e. with b1+ it would be necesary any way to first make a new copy and 
+then change the reference. Instead, here all copies are created automatic in the first place. A simple solution with no need 
+for garbage collection.
 
 The buffers of the stacks and the pads are the only limits:
 
@@ -16,10 +22,13 @@ b 2000 bfaculty cr b.
 
 instantly fills the screen with about 5700 decimal digits, but that's just about the limit with the original settings.
 
-One problem with this is how to implement variables. Because of this and the cell block moving stack manipulations there is an extra x-stack. The top values on the x-stack can be called by bx, by and bz. This stack simplifies bignum calculations and could be used as a substitute for variables. Constants are more easy to implement. The only words for defining constants so far are
+One problem with this is how to implement variables. Because of this and the cell block moving stack manipulations there is an 
+extra x-stack. The top values on the x-stack can be called by bx, by and bz. This stack simplifies bignum calculations and 
+could be used as a substitute for variables. Constants are more easy to implement. The only words for defining constants so 
+far are
 
-bsconstant and bdconstant that are created with single vs double numbers and when called put corresponding numbers on the b-stack.
-
+bsconstant and bdconstant that are created with single vs double numbers and when called put corresponding numbers on the 
+b-stack.
 
 The most important definitions:
 
