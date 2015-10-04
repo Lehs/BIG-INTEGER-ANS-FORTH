@@ -1,0 +1,102 @@
+Introduction to BigInt
+
+The prefix b stands for big (unsigned) integer, in br the r stands for remain, that is, the bignum values on the stack remain, eventually under return values on the topp of the stack, and bs refer to mixed input of singles and bigs. Otherwise  there is an analogy with floats and the prefix f. And as for floats there is a special stack, independent of the parameter stack.
+
+The b-stack is really two stacks:
+
+One for references in highmem of an allocated buffer, starting at v$0 and ending at b0 - 1, growing towards lowmem;
+
+One for cell-strings in lowmem, blocks of cells representing the bignum growing towards highmem, representing a bignum with lower significant cells in lower memory.
+
+Stack manipulations as bdup and bover creates new references to new copies of cell strings. It would be faster to only manipulate references, but when changing the bignumber i.e. with b1+ it would be necesary any way to first make a new copy and then change the reference. Instead, here all copies are created automatic in the first place. A simple solution with no need for garbage collection.
+
+The buffers of the stacks and the pads are the only limits:
+
+b 2000 bfaculty cr b.
+
+instantly fills the screen with about 5700 decimal digits, but that's just about the limit with the original settings.
+
+One problem with this is how to implement variables. Because of this and the cell block moving stack manipulations there is an extra x-stack. The top values on the x-stack can be called by bx, by and bz. This stack simplifies bignum calculations and could be used as a substitute for variables. Constants are more easy to implement. The only words for defining constants so far are
+
+bsconstant and bdconstant that are created with single vs double numbers and when called put corresponding numbers on the b-stack.
+
+
+The most important definitions:
+
+bempty 		\ -- f
+bsconstant 	\ n --
+bdconstant 	\ ud –
+bvariable	\ #bytes --
+b@		\ -- b | ad --
+b!		\ b -- | ad -
+bdrop 		\ u --
+bdup  		\ u -- u u
+bover 		\ u v -- u v u
+boover 		\ u v w -- u v w u
+xempty 		\ -- f
+>bx		\ u --
+bx!		\ u --
+bx		\ -- u
+bx>		\ -- u
+by		\ -- u
+bz		\ -- u
+bnip 		\ u v -- v
+bswap 		\ u v -- v u
+brot 		\ u v w -- v w u
+btuck 		\ u v -- v u v
+b2swap		\ a b c d -- c d a b
+b2drop		\ a b --
+b2dup		\ a b -- a b a b
+b3dup		\ a b c -- a b c a b c
+bzero 		\ -- 0
+bone 		\ -- 1
+btwo 		\ -- 2
+bthree 		\ -- 3
+bten 		\ -- 10
+bdepth		\ -- f
+s>b		\ -- u | n --
+b>s		\ u -- | -- n
+d>b		\ -- u | ud --
+b>d		\ u -- | -- ud
+d256*		\ ud -- 256ud
+b		\ example: b 123456789 puts the number on tos, does not work in definitions
+b+		\ u v -- u+v
+br<		\ u v -- u v | -- f
+b<		\ u v -- | -- f
+br=		\ u v -- u v | -- f
+b=		\ u v -- | -- f
+br0=		\ u -- u | -- f
+b0=		\ u -- | -- f
+b-		\ u v -- u-v
+blshift		\ u -- v | n --		shift left
+brshift		\ u -- v | n --		shift right
+b1+		\ b -- b+1
+b2+		\ b -- b+2
+b1-		\ b -- b-1
+b2*		\ b -- 2b
+b2/		\ b -- b/2
+b256*		\ b -- 256bs
+bs*		\ u -- u*n | n --
+b*		\ u v -- u*v
+bs/mod		\ u -- v | n -- r  	u=nv+r 
+b.		\ u -- 			print tos
+br.		\ u -- u		print tos
+.b		\ 			print b-stack
+.x		\			print x-stack
+b/mod		\ u v -- r q
+b/ 		\ u v -- u/v
+bmod 		\ u v – rest
+>bar		\ u --			precalculate for barmod
+barmod		\ w -- v		v = w mod u, w < u^2
+b** 		\ u v -- u^v
+bs** 		\ u -- u^n | n --
+bsqrtf 		\ u -- v		floor
+bsqrtc 		\ u -- v		ceiling
+bfaculty  	\ u – u!
+bsfaculty	\ -- n! | n --
+bgcd 		\ u v -- w		greatest common devisor
+blcm 		\ u v -- w		least common multiple
+b**mod 		\ u v m -- [u^v mod m]
+bprime 		\ u -- | -- f
+bnext_prime 	\ b -- p 		possibly b=p
+binvmod		\ b u -- b'		b*b'= 1(mod u)
