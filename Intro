@@ -4,7 +4,7 @@ The prefix b stands for big (unsigned) integer, in br the r stands for remain, t
 eventually under return values on the topp of the stack, and bs refer to mixed input of singles and bigs. Otherwise  there is 
 an analogy with floats and the prefix f. And as for floats there is a special stack, independent of the parameter stack.
 
-The b-stack is really two stacks: 
+The b-stack is really two stacks:
 
 One for references in highmem of an allocated buffer, starting at v$0 and ending at b0 - 1, growing towards lowmem;
 
