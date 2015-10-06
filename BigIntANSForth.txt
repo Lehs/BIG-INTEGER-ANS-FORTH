@@ -415,19 +415,16 @@ vst! 	\ initialize stack för dynamical numbers
   bx> b+ bx> br< >bx >bx 0=
   dup if xdrop xdrop then ;	\ 2 xdrop when equal or greater
 
-: b~ \ u v -- |u-v| | -- f      f is minus sign		erroneous!!
+: b~ \ u v -- |u-v| | -- f
   br< if bswap true else false then >zs
+  first len1 + len2 len1 - >r r@ erase r> bvp @ +!      
   first >xs second >ys false >zs
   len1 0
-  do ys@ i + @ zs@ + xs@ i + @ 2dup u< zs! zs@
-     if 1 swap 0 d- drop else - then ys@ i + ! cell
-  +loop len2 len1
-  do ys@ i + @ dup 0= xs! xs@ zs@ and
-     if drop -1 
-     else zs@ + 0 zs! 
-     then ys@ i + ! zs@ 0= 
-     if leave then cell
-  +loop drop-all zs> bdrop <top ;
+  do ys@ i + @ zs@ + xs@ i + @ 2dup u< dup zs!
+     if 1 swap 0 d- drop
+     else - 
+     then ys@ i + ! cell
+  +loop drop-all bdrop <top zs> ;
 
 : b- \ u v -- u-v
   b~ if cr ." negative big!" cr 10 throw then ; 
