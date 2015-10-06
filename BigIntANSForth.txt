@@ -430,9 +430,7 @@ vst! 	\ initialize stack för dynamical numbers
   +loop drop-all zs> bdrop <top ;
 
 : b- \ u v -- u-v
-  >bx >bx bx by
-  b~ if cr ." negative big!" cr 10 throw then 
-  xdrop xdrop ; 
+  b~ if cr ." negative big!" cr 10 throw then ; 
 
 : |b-| \ u v -- |u-v|
   b~ drop ;
@@ -459,7 +457,7 @@ vst! 	\ initialize stack för dynamical numbers
   8/mod >ys >xs 
   nextfree 0! nextfree first
   do ys@ i + @ 0FFFF and 
-     xs@ rshift dup 0FF and i c! drop
+     xs@ rshift 0FF and i c!
   loop nextfree ys@ - ys> erase
   <top xsdrop ;
 
