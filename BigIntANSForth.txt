@@ -415,7 +415,7 @@ vst! 	\ initialize stack för dynamical numbers
   bx> b+ bx> br< >bx >bx 0=
   dup if xdrop xdrop then ;	\ 2 xdrop when equal or greater
 
-: b~ \ u v -- |u-v| | -- f      f is minus sign
+: b~ \ u v -- |u-v| | -- f      f is minus sign		erroneous!!
   br< if bswap true else false then >zs
   first >xs second >ys false >zs
   len1 0
@@ -590,7 +590,7 @@ vst! 	\ initialize stack för dynamical numbers
 \ q=t*x/2^[2n]
 : b/ \ u v -- q 				Newton-Ralphson on y=2^s/x-A
   br< if bdrop bdrop bzero exit then
-  len1 5 < if b>s bs/mod drop exit then
+  len1 cell > 0= if b>s bs/mod drop exit then
   blog~ >xs >bx bdup blog~ 2/ 6 + >ys 
   ys@ 2* xs> - dup >xs bone blshift xs>
   if 6 bs* 5 bs/mod drop then 0F 0				\ start value
