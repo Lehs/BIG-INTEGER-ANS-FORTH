@@ -416,19 +416,14 @@ vst! 	\ initialize stack för dynamical numbers
   dup if xdrop xdrop then ;	\ 2 xdrop when equal or greater
 
 variable borrow
-variable leverage
 : b~ \ u v -- |u-v| | -- f
   br< if bswap true else false then >zs
-  first len1 + len2 len1 - dup bvp @ +! erase 
-  false borrow ! false leverage !
-  first >xs second >ys len1 0
-  do ys@ i + @ dup
-     if borrow @ + 0 leverage !
-     else borrow @ negate leverage !
-     then xs@ i + @ 2dup leverage @ + u< dup borrow !
-     if 1 swap 0 d- drop
-     else - 
-     then leverage @ - ys@ i + ! cell
+  first len1 + len2 len1 - dup bvp @ +! erase
+  false borrow ! first >xs second >ys len1 0
+  do i ys@ + @ 0
+     borrow @ 0 d-
+     i xs@ + @ 0 d-
+     abs borrow ! i ys@ + ! cell
   +loop 0 >zs drop-all bdrop <top zs> ;
 
 : b- \ u v -- u-v
