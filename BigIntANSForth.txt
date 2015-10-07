@@ -41,6 +41,7 @@ cell negate constant -cell
 
 : >xs ( n -- )  cell xs +! xs @ ! ;
 : xs> ( -- n )  xs @ @ -cell xs +! ;
+: >xs> ( m -- n) xs @ @ swap xs @ ! ;
 : xs@ ( -- n )  xs @ @ ;
 : xs! ( n -- )  xs @ ! ;
 : xs+! ( n -- )  xs @ +! ; 
@@ -52,6 +53,7 @@ cell negate constant -cell
 
 : >ys ( n -- )  cell ys +! ys @ ! ;
 : ys> ( -- n )  ys @ @ -cell ys +! ;
+: >ys> ( m -- n) ys @ @ swap ys @ ! ;
 : ys@ ( -- n )  ys @ @ ;
 : ys! ( n -- )  ys @ ! ;
 : ys+! ( n -- )  ys @ +! ; 
@@ -63,6 +65,7 @@ cell negate constant -cell
 
 : >zs ( n -- )  cell zs +! zs @ ! ;
 : zs> ( -- n )  zs @ @ -cell zs +! ;
+: >zs> ( m -- n) zs @ @ swap zs @ ! ;
 : zs@ ( -- n )  zs @ @ ;
 : zs! ( n -- )  zs @ ! ;
 : zs+! ( n -- )  zs @ +! ; 
