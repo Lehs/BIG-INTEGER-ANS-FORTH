@@ -320,6 +320,25 @@ vst! 	\ initialize stack för dynamical numbers
 : len# \ n -- m 
   dup nth swap 1- nth ?dup
   if swap else v$0 swap then - ; 
+  
+: bpick \ bn ... b0 -- bn ... b0 bm | m -- 
+  dup nth swap len# bpusha ;
+
+: xnth ( n -- b/0 )  1+ xp @ swap cells + 
+  dup x0 = if drop 0 else @ then ; 
+
+: xlen# \ n -- m 
+  dup xnth swap 1- xnth ?dup
+  if swap else x$0 swap then - ; 
+
+: bxpick \ xn ... x0 -- xn ... x0 xm | m --
+  dup xnth swap xlen# bpusha ;
+
+: #>bx \ bn ... b0 -- bn ... bm  x: -- bm-1 ... b0 | m --
+  0 do >bx loop ;
+
+: #bx> \ -- bm-1 ... b0  x: bm-1 ... b0 -- | m --
+  0 do bx> loop ;
 
 : bdepth \ -- n 
   040 0					\ depth of stack
