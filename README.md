@@ -4,7 +4,7 @@ For more than a year ago I started to define words for arithmetics on arbitrary 
 32 bit SP-Forth on Vista and Windows 10; 
 32 bit GForth on Vista, Windows 10 and Android; 
 32 bit SwiftForth on Vista and Windows 10; 
-32 bit Win32Forth on Vista and Windows 10;
+Win32Forth on Vista and Windows 10;
 64 bit GForth and GForth-fast on Windows 10; 
 32 bit Gforth and GForth-fast on Linux; 
 64 bit Gforth and GForth-fast on Linux.
