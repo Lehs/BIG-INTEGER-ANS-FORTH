@@ -8,30 +8,24 @@ base @ hex
 
 \ miscellanous
 
- : 0! 0 swap ! ;
- : 1+! 1 swap +! ;
- : u2/ 1 rshift ;
- : u/ 0 swap um/mod nip ;
- : umod 0 swap um/mod drop ;
- : cell- cell - ;
- : rdrop r> drop ;
- : .r >r 0 <# #S #> r> over - spaces type ;
+: 0! 0 swap ! ;
+: 1+! 1 swap +! ;
+: u2/ 1 rshift ;
+: u/ 0 swap um/mod nip ;
+: umod 0 swap um/mod drop ;
+: cell- cell - ;
+: rdrop r> drop ;
+: .r >r 0 <# #S #> r> over - spaces type ;
+: s>f s>d d>f ;
+: f>s f>d d>s ;
 
 : d256*  \ ud -- 256ud
   over 8 lshift rot 0FF000000 and 018 rshift
   rot 8 lshift or ;
 
 : sqrtf \ m -- n	floor
-  dup 4 u< 
-  if dup 
-     if drop 1
-     then exit
-  then dup 1- >r u2/	\ start value
-  begin r@ over u/	\ Newton-Ralphson
-     over + u2/
-     tuck u> 0=
-  until rdrop ;
-
+  0 d>f fsqrt f>s ;
+  
 : sqrtc \ m -- n	ceiling
   1- sqrtf 1+ ;
 
@@ -149,16 +143,16 @@ pad1 + cell - constant pad2
 vst! 	\ initialize stack för dynamical numbers
 
 : nextfree ( -- a )  bvp @ @ ;
-: first ( -- a )  bvp @ cell + @ ;			\ big on tos
+: first ( -- a )  bvp @ cell + @ ;	\ big on tos
 : second ( -- a )  bvp @ 2 cells + @ ;	\ big on second
 : third ( -- a )  bvp @ 3 cells + @ ;	\ big on third
-: vp+ ( -- )  -cell bvp +! ;					\ stack pointer
+: vp+ ( -- )  -cell bvp +! ;		\ stack pointer
 
 : tov \ ad --		ad of number array to stack
   vp+ bvp @ ! ;
 
 : bempty ( -- f )  nextfree v$0 = ;
-: len1 ( -- n )  nextfree first - ;		\ get length to first
+: len1 ( -- n )  nextfree first - ;	\ get length to first
 : len2 ( -- n )  first second - ;
 : len3 ( -- n )  second third - ;
 : top$ ( -- a n )  first len1 ;
@@ -181,16 +175,16 @@ vst! 	\ initialize stack för dynamical numbers
   rez >xs nextfree xs@ over + tov xs> cmove ;
 
 : bpush \ a n --	put any number array on stack
-  nextfree over aligned		\ a n nxt na
-  2dup + cell - 0!		\ a n nxt na 
-  over + tov			\ a n nxt
-  swap cmove ;			\ 
+  nextfree over aligned		 \ a n nxt na
+  2dup + cell - 0!		      \ a n nxt na 
+  over + tov              \ a n nxt
+  swap cmove ;
 
 : bpusha \ a n --	put aligned number array on stack
   nextfree 2>r 2r@ swap cmove
   2r> + tov ;
 
-: bdupall \ v -- v u	allocate array of same size
+: bdupall \ v -- v u	      allocate array of same size as btos
   nextfree len1 + tov ;
 
 : bdrop  cell bvp +! ;
@@ -249,9 +243,9 @@ vst! 	\ initialize stack för dynamical numbers
 : b2drop bdrop bdrop ;
 : b3dup boover boover boover ;
 
-: reztop  top$ xpush bdrop bx> ; 	\ clean leading asczeros
+: reztop  top$ xpush bdrop bx> ;      \ clean leading asczeros
 : vzero  [char] 0 nextfree tuck c! 1+ tov ;
-: bzero 0 vdigit ;			\ small bigintegers
+: bzero 0 vdigit ;                    \ small bigintegers
 : bone  1 vdigit ;
 : btwo  2 vdigit ;
 : bthree 3 vdigit ;
@@ -271,7 +265,7 @@ vst! 	\ initialize stack för dynamical numbers
 
 : <top  \ delete unwanted leading zeros
   begin len1 cell > 0=
-     if nextfree 0! cell len1 - bvp @ +! exit
+     if nextfree 0! exit
      then nextfree cell - @ 0= 		
   while -cell bvp @ +! 
   repeat nextfree 0! cell len1 3 and - 3 and bvp @ +! ; 
@@ -320,7 +314,7 @@ vst! 	\ initialize stack för dynamical numbers
 : len# \ n -- m 
   dup nth swap 1- nth ?dup
   if swap else v$0 swap then - ; 
-  
+
 : bpick \ bn ... b0 -- bn ... b0 bm | m -- 
   dup nth swap len# bpusha ;
 
@@ -438,7 +432,7 @@ vst! 	\ initialize stack för dynamical numbers
 : .x  xempty 0=
   if bx> cr br. recurse >bx then ;
 
-: gtx? \ v -- v | -- f		greater than x-value?
+: gtx? \ v -- v | -- f		greater than value in bx?
   len1 xlen 2dup <
   if 2drop false exit then >
   if true exit then false 0 xlen cell -
@@ -486,7 +480,7 @@ variable borrow
 : brshift \ v -- u | n -- 
   8/mod >ys >xs 
   nextfree 0! nextfree first
-  do ys@ i + @ 0FFFF and xs@ rshift ( dup ) 0FF and i c! ( drop )
+  do ys@ i + @ 0FFFF and xs@ rshift 0FF and i c!
   loop nextfree ys@ - ys> erase
   <top xsdrop ;
 
@@ -505,15 +499,15 @@ variable borrow
 : b2/mod \ v -- r k 
   b1and bswap 1 brshift ;
 
-: msb@ \ v -- v | -- c
+: msb@ \ v -- v | -- c      most significant byte in value on tos
   nextfree cell- nextfree 1-
   do i c@ ?dup if leave then -1 +loop ;
 
-: msb@2 \ u v -- u v | -- c
+: msb@2 \ u v -- u v | -- c      most sign byte second for on stack
   first cell- first 1-
   do i c@ ?dup if leave then -1 +loop ;
 
-: z# \ v -- v | -- n
+: z# \ v -- v | -- n      nr of zero bytes in most sign cell tos
   0 >xs nextfree
   begin 1- dup c@ 0=
   while 1 xs+! 
@@ -526,12 +520,12 @@ variable borrow
   repeat drop xs> ;
 
 : blog~ \ v -- v | -- n		8(len-1)+log(byte0)+1
-  len1 z# - 1- 3 lshift msb@ log~ + ;
+  len1 z# - 1- 3 lshift msb@ log~ + ; \ n is the number of binary digits
 
 : blog~2 \ u v -- u v | -- n 
   len2 z#2 - 1- 3 lshift msb@2 log~ + ;
 
-: blog \ v -- | -- n	\ integer part of 2-logarithm
+: blog \ v -- | -- n	 integer part of 2-logarithm
   blog~ 1- bdrop ;
 
 : b1+ bone b+ ;
@@ -565,17 +559,17 @@ variable borrow
   do dup i @ um* xs> 0 d+ >xs last!> cell +loop 
   xs> nextfree cell - ! drop <top ; 
 
-: 32bleft \ v -- w
+: bitsblshift \ v -- w	       big shift left with number of bits
   top$ over cell+ swap cmove>
   cell bvp @ +! 0 first ! ;
 
 : b* \ u v -- u*v
   len1 len2 < if bswap then
   >bx bzero second first cell - 
-  do 32bleft i @ cell*x b+ -cell +loop
+  do bitsblshift i @ cell*x b+ -cell +loop
   bnip xdrop <top ;
 
-: brandom \ -- u | n --		      n is the maximal number of decimal digits in u
+: brandom \ -- u | n --   n is the maximal number of decimal digits in u
   bzero 0 do bten b* 10 random s>b b+ loop ;
 
 \ 2^sxn+1=2*2^sxn-[2^sxn]^2*n/2^[2s] 
@@ -602,7 +596,7 @@ variable foo
 1k bvariable bar
 1k bvariable den
 
-: barmod \ w -- v			w < u**2
+: barmod \ w -- v			w < denominator**2
   bdup bar b@ br< 
   if bdrop bdrop exit then
   b* foo @ brshift			\ w q
@@ -610,7 +604,7 @@ variable foo
   den b@ br<
   if bdrop else b- then ;
 
-: >bar \ u -- 
+: >bar \ u -- 	 	u is the denominator; precalc for barmod
   blog~ 2* dup foo ! 			\ foo = 2k
   bone blshift bover b/ bar b! 		\ bar = 2^foo/u
   den b! ;				\ bx = u
@@ -628,24 +622,9 @@ variable foo
 : b/mod \ w u -- r q
   bover bover b/ bdup >bx b* b- bx> ;
 
-: qwerty \ u v -- s t		binary split
-  bover bover b+ 1 brshift bdup btwo b** bx br<
-  if bdrop bdrop brot bdrop bswap
-  else bdrop bdrop bnip
-  then ; 
-
-: bsqrtx \ u -- v | x: -- u
-  >bx bx blog~ u2/ brshift b1+
-  begin bdup bx bover b/ b+ b1+ b2/
-    bswap bover |b-| bone b<  
-  until ;
-
-: bsqrt~ \ w -- u v		u=v-1 v=ceil
-  bsqrtx bdup b1- bswap b1+ qwerty xdrop ;
-
-: bsqrtf \ w -- v
+: bsqrtf \ w -- v                  \ Newton-Ralphson
   br0= if exit then
-  blog~ u2/ bone blshift 10 0
+  blog~ u2/ bone blshift 10 0      \ start value
   do bover bover b/ br=
      b+ b2/ if leave then
   loop bdup bdup b* brot bswap br< bdrop bdrop
@@ -746,9 +725,10 @@ variable foo
 : bnext_fermat b1or \ u -- v
   begin bdup bfermat 0= while b2+ repeat ;
 
-: prime~ \ n -- f			n odd >?
+: prime~ \ n -- f			n odd 
   dup 3 = if drop true exit then
-  >xs true >ys xs@ s>b bsqrtf b>s 1+ 3
+  >xs true >ys xs@
+  sqrtf 1+ 3
   ?do xs@ i umod 0=
     if false ys! leave then 2
   +loop xsdrop ys> ;
@@ -825,7 +805,8 @@ variable foo
   br0= if false exit then
   sieve
   ?dup if exit then
-  bdup bsqrtx xdrop bdup b* br= bdrop 0= ;
+  bdup bsqrtf
+  bdup b* br= bdrop 0= ;
 
 \ hart factoring - "one line factoring"
 : bhart \ w -- v
@@ -835,6 +816,7 @@ variable foo
      if bsqrtf |b-| bx> bgcd xsdrop exit then bdrop bdrop
   again ;
 \ http://wrap.warwick.ac.uk/54707/1/wrap_hart_s1446788712000146a.pdf
+\ cl b 10 b 29 b** b 5342347 b+ bnext_prime b 10 b 31 b** b 2232788 b+ bnext_prime .b b* bhart .b
 
 \ testing for single number divisors of w in the intervall n,m-1
 : sfac \ w -- w ?v | m n -- f 
@@ -842,8 +824,6 @@ variable foo
   do bdup i bs/mod 0= 
      if i xs! leave then bdrop 2
   +loop xs> ;
-
-\ cl b 10 b 29 b** b 5342347 b+ bnext_prime b 10 b 31 b** b 2232788 b+ bnext_prime .b b* bhart .b
 
 -1 value slim
 
