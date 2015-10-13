@@ -747,8 +747,6 @@ variable foo
      then
   loop drop bdrop xdrop ys> ;
 
-\ castackstrophe
-
 : bmiller \ u -- | -- f		u odd >3
   >bx bx xsi bx rs >zs bover bover
   bx pseudo1 ?dup
