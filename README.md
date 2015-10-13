@@ -9,3 +9,4 @@ Win32Forth on Vista and Windows 10;
 32 bit Gforth and GForth-fast on Linux; 
 64 bit Gforth and GForth-fast on Linux.
 
+There was a typo in the definition of barrett reduction modulo that caused rare errors for big numbers. Now fixed.
