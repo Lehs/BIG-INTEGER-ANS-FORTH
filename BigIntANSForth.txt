@@ -1,4 +1,4 @@
-\ unsigned natural numbers of dynamical length in 32 & 64 bit ANS Forth
+\ unsigned natural numbers of dynamical length in 32+ bit ANS Forth
 \ 2015 ver 2.1
 \ started by Lars-Erik Svahn, Sweden
 \ I appreciate enhancements and other feedback
@@ -23,9 +23,9 @@ base @ hex
   over 8 lshift rot 0FF000000 and 018 rshift
   rot 8 lshift or ;
 
-: sqrtf \ m -- n	floor
+: sqrtf \ m -- n       floor
   0 d>f fsqrt f>s ;
-  
+
 : sqrtc \ m -- n	ceiling
   1- sqrtf 1+ ;
 
@@ -58,41 +58,66 @@ cell log~ 1- constant lcell
 
 \ extra stacks for singel numbers
 
-2k allocate throw dup value xs dup ! 
+: clst ( ad -- )  dup ! ;
+: stdrops ( m ad -- )  swap cells negate swap +! ; 
+: stdrop ( ad -- ) -cell swap +! ;
+: >st ( n ad -- )  cell over +! @ ! ;
+: st> ( ad -- n )  dup @ @ -cell rot +! ;
+: >st> ( n ad -- m )  dup @ @ -rot @ ! ;
+: st@ ( ad -- n )  @ @ ;
+: st! ( n ad -- )  @ ! ;
+: st+! ( n ad -- )  @ +! ;
+: stpick ( m ad -- xm )  @ swap cells - @ ;
+: stpatch ( n m ad -- )  @ swap cells - ! ;
+: stpatad ( n m ad -- )  @ swap cells - +! ;
+: stdepth ( ad -- n )  dup @ swap - lcell rshift ;
 
-: >xs ( n -- )  cell xs +! xs @ ! ;
-: xs> ( -- n )  xs @ @ -cell xs +! ;
-: >xs> ( m -- n) xs @ @ swap xs @ ! ;
-: xs@ ( -- n )  xs @ @ ;
-: xs! ( n -- )  xs @ ! ;
-: xs+! ( n -- )  xs @ +! ; 
-: xsdrop ( -- )  -cell xs +! ; 
-: xsdrops ( n -- )  cells negate xs +! ;
-: xsdepth ( -- #bytes )  xs @ xs - lcell rshift ;
+: .st \ ad -- 
+  dup @ cell+ swap cell+
+  ?do i @ . cell
+  +loop ;
 
-2k allocate throw dup value ys dup ! 
+: >st# \ xn ... x1 n ad -- 
+  swap 0
+  ?do cell over +! swap over @ !
+  loop drop ;
 
-: >ys ( n -- )  cell ys +! ys @ ! ;
-: ys> ( -- n )  ys @ @ -cell ys +! ;
-: >ys> ( m -- n) ys @ @ swap ys @ ! ;
-: ys@ ( -- n )  ys @ @ ;
-: ys! ( n -- )  ys @ ! ;
-: ys+! ( n -- )  ys @ +! ; 
-: ysdrop ( -- )  -cell ys +! ; 
-: ysdrops ( n -- )  cells negate ys +! ;
-: ysdepth ( -- n )  ys @ ys - lcell rshift ;
+: stack \ size -- 
+  allocate throw dup constant clst ;
 
-2k allocate throw dup value zs dup ! 
+2k stack xs
 
-: >zs ( n -- )  cell zs +! zs @ ! ;
-: zs> ( -- n )  zs @ @ -cell zs +! ;
-: >zs> ( m -- n) zs @ @ swap zs @ ! ;
-: zs@ ( -- n )  zs @ @ ;
-: zs! ( n -- )  zs @ ! ;
-: zs+! ( n -- )  zs @ +! ; 
-: zsdrop ( -- )  -cell zs +! ; 
-: zsdrops ( n -- )  cells negate zs +! ;
-: zsdepth ( -- n )  zs @ zs - lcell rshift ;
+: >xs ( n -- )  xs >st ;
+: xs> ( -- n )  xs st> ;
+: >xs> ( m -- n)  xs >st> ;
+: xs@ ( -- n )  xs st@ ;
+: xs! ( n -- )  xs st! ;
+: xs+! ( n -- )  xs st+! ; 
+: xsdrop ( -- )  xs stdrop ; 
+: xsdepth ( -- #bytes )  xs stdepth ;
+
+2k stack ys 
+
+: >ys ( n -- )  ys >st ;
+: ys> ( -- n )  ys st> ;
+: >ys> ( m -- n)  ys >st> ;
+: ys@ ( -- n )  ys st@ ;
+: ys! ( n -- )  ys st! ;
+: ys+! ( n -- )  ys st+! ; 
+: ysdrop ( -- )  ys stdrop ; 
+: ysdepth ( -- n )  ys stdepth ;
+
+2k stack zs 
+
+: >zs ( n -- )  zs >st ;
+: zs> ( -- n )  zs st> ;
+: >zs> ( m -- n)  zs >st> ;
+: zs@ ( -- n )  zs st@ ;
+: zs! ( n -- )  zs st! ;
+: zs+! ( n -- )  zs st+! ; 
+: zsdrop ( -- )  zs stdrop ; 
+: zsdepth ( -- n )  zs stdepth ;
+
 : drop-all ( -- )  xsdrop ysdrop zsdrop ;
 
 \ pseudo random numbers
@@ -404,6 +429,12 @@ vst! 	\ initialize stack för dynamical numbers
 : b= \ u v -- | --f
   br= bdrop bdrop ;
 
+: br> \ u v -- u v | -- f
+  br= br< or 0= ;
+
+: b> \ u v -- | --f
+  br> bdrop bdrop ;
+
 : br0= \ v -- v | -- f
   len1 cell - first @ or 0= ;
 
@@ -591,23 +622,25 @@ variable borrow
   bnip xdrop ; \ t-nq>n <=> t>n+nq
 
 \ Barrett reduction 
+\ Faster modulo when repeting [mod d] with same d
 
 variable foo
 1k bvariable bar
 1k bvariable den
 
-: barmod \ w -- v			w < denominator**2
-  bdup bar b@ br< 
-  if bdrop bdrop exit then
-  b* foo @ brshift			\ w q
-  den b@ b* b- 				\ r
+: barmod \ w -- v			w < d**2
+  bdup den b@ br< 
+  if b2drop exit 
+  then bdrop bar b@ b*
+  foo @ brshift				\ w q
+  den b@ b* b- 				\ w-qd
   den b@ br<
   if bdrop else b- then ;
 
 : >bar \ u -- 	 	u is the denominator; precalc for barmod
-  blog~ 2* dup foo ! 			\ foo = 2k
+  blog~ 2* dup foo ! 			\ foo = 2*bitlen
   bone blshift bover b/ bar b! 		\ bar = 2^foo/u
-  den b! ;				\ bx = u
+  den b! ;				\ den = u
 
 : b** \ b a -- b^a
   first @ 0= if bdrop bdrop bone exit then
@@ -680,16 +713,18 @@ variable foo
   loop nip xs> lbits lshift +
   dup brshift ;
 
-: xsi \ u -- v
-  len1 bdrop cell = if btwo exit then
-  0100 random 3 or vdigit ;
+: xsi \ u -- v		u>2
+  len1 cell =
+  if first @ 0100 < 
+     if bdrop btwo exit then
+  then bdrop 0100 random 2 or vdigit ;
 
-: digit= \ u -- u | n -- f
-  len1 cell > if drop false exit then
-  first @ = ;
+: digit= \ u -- | n -- f	u=n?
+  len1 cell > if drop bdrop false exit then
+  first @ = bdrop ;
 
 : pseudo1 \ xsi s m -- | -- f
-  b**mod 1 digit= bdrop ;
+  b**mod 1 digit= ;
 
 : pseudo2 \ xsi s m -- | r -- f
   >bx bx b1- >bx false >ys 0
@@ -698,13 +733,29 @@ variable foo
      if true ys! leave then
   loop xdrop xdrop bdrop bdrop ys> ;
 
-: bmiller \ u -- | -- f		u odd >2
+\ algorithm from Wikipedia
+: bmiller~ \ u -- | k -- f	u odd >3
+  bdup >bx rs true >ys swap 0			\ s | r k 0
+  do bx xsi bover bx b**mod			\ s x | r
+     bdup 1 digit= b1+ bx b= or 0=		\ s | r f
+     if dup 1- 0				\ s | r r-1 0
+        do bx bdup b* barmod			\ s x | r
+           bdup 1 digit= b1+ bx b= 0= or	\ s | r f
+           if false ys! leave
+           then 
+        loop ys@ 0= if leave then
+     then
+  loop drop bdrop xdrop ys> ;
+
+\ castackstrophe
+
+: bmiller \ u -- | -- f		u odd >3
   >bx bx xsi bx rs >zs bover bover
   bx pseudo1 ?dup
   if xdrop bdrop bdrop zsdrop exit
   then bx> zs> pseudo2 ;
 \ u is of the form u=1+s*2^r, where s is odd
-\ given any number 1 =< xsi < u
+\ given any number 1 < xsi < u
 \ if xsi^s=1[mod u] or
 \ if it exist j: 0 =< j < r with
 \ xsi^[s*2^j]=-1[mod u]
@@ -720,12 +771,12 @@ variable foo
   if btwo 
   else 0FF random 3 or s>b
   then bover bone b- brot b**mod
-  1 digit= bdrop ;
+  1 digit= ;
 
 : bnext_fermat b1or \ u -- v
   begin bdup bfermat 0= while b2+ repeat ;
 
-: prime~ \ n -- f			n odd 
+: prime~ \ n -- f			n odd >1
   dup 3 = if drop true exit then
   >xs true >ys xs@
   sqrtf 1+ 3
@@ -744,9 +795,7 @@ variable foo
   dup 1 and 0= if drop false exit then
   prime~ ;
 
-: bprime \ u -- | -- f
-  len1 cell = if b>s prime exit then
-  beven if bdrop false exit then
+: bfemimi \ u -- | -- f
   bdup bfermat
   if bdup bmiller
      if bmiller 
@@ -754,6 +803,15 @@ variable foo
      then
   else bdrop false
   then ;
+
+0x20000 value bplim
+: bprime \ u -- | -- f
+  len1 cell =
+  if bdup b>s bplim <
+     if b>s prime exit then
+  then beven
+  if bdrop false exit then
+  bfemimi ;
 
 : bnext_prime \ b -- p 
   b1or 
@@ -816,7 +874,6 @@ variable foo
      if bsqrtf |b-| bx> bgcd xsdrop exit then bdrop bdrop
   again ;
 \ http://wrap.warwick.ac.uk/54707/1/wrap_hart_s1446788712000146a.pdf
-\ cl b 10 b 29 b** b 5342347 b+ bnext_prime b 10 b 31 b** b 2232788 b+ bnext_prime .b b* bhart .b
 
 \ testing for single number divisors of w in the intervall n,m-1
 : sfac \ w -- w ?v | m n -- f 
@@ -824,6 +881,8 @@ variable foo
   do bdup i bs/mod 0= 
      if i xs! leave then bdrop 2
   +loop xs> ;
+
+\ cl b 10 b 29 b** b 5342347 b+ bnext_prime b 10 b 31 b** b 2232788 b+ bnext_prime .b b* bhart .b
 
 -1 value slim
 
