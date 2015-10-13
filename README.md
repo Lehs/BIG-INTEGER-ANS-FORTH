@@ -8,6 +8,7 @@ Win32Forth on Vista and Windows 10;
 64 bit GForth and GForth-fast on Windows 10; 
 32 bit Gforth and GForth-fast on Linux; 
 64 bit Gforth and GForth-fast on Linux; 
-vfxlin 4.71 (MPE VFX Forth) on Linux.
+vfxlin 4.71 (MPE VFX Forth) on Linux; 
+GForth Raspberry Pi 2 (900MHz quad-core ARM Cortex-A7).
 
 There was a typo in the definition of barrett reduction modulo that caused rare errors for big numbers. Now fixed.
