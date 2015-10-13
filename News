@@ -16,3 +16,32 @@
 
 : #bx> \ -- bm-1 ... b0  x: bm-1 ... b0 -- | m --
   0 do bx> loop ;
+
+\ extra stacks for singel numbers
+
+: clst ( ad -- )  dup ! ;
+: stdrops ( m ad -- )  swap cells negate swap +! ; 
+: stdrop ( ad -- ) -cell swap +! ;
+: >st ( n ad -- )  cell over +! @ ! ;
+: st> ( ad -- n )  dup @ @ -cell rot +! ;
+: >st> ( n ad -- m )  dup @ @ -rot @ ! ;
+: st@ ( ad -- n )  @ @ ;
+: st! ( n ad -- )  @ ! ;
+: st+! ( n ad -- )  @ +! ;
+: stpick ( m ad -- xm )  @ swap cells - @ ;
+: stpatch ( n m ad -- )  @ swap cells - ! ;
+: stpatad ( n m ad -- )  @ swap cells - +! ;
+: stdepth ( ad -- n )  dup @ swap - lcell rshift ;
+
+: .st \ ad -- 
+  dup @ cell+ swap cell+
+  ?do i @ . cell
+  +loop ;
+
+: >st# \ xn ... x1 n ad -- 
+  swap 0
+  ?do cell over +! swap over @ !
+  loop drop ;
+
+: stack \ size --         \ i.e. '128 stack alpha' and then 'alpha .st' etc
+  allocate throw dup constant clst ;
