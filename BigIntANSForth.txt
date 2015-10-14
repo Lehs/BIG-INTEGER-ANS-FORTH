@@ -733,20 +733,6 @@ variable foo
      if true ys! leave then
   loop xdrop xdrop bdrop bdrop ys> ;
 
-\ algorithm from Wikipedia
-: bmiller~ \ u -- | k -- f	u odd >3
-  bdup >bx rs true >ys swap 0			\ s | r k 0
-  do bx xsi bover bx b**mod			\ s x | r
-     bdup 1 digit= b1+ bx b= or 0=		\ s | r f
-     if dup 1- 0				\ s | r r-1 0
-        do bx bdup b* barmod			\ s x | r
-           bdup 1 digit= b1+ bx b= 0= or	\ s | r f
-           if false ys! leave
-           then 
-        loop ys@ 0= if leave then
-     then
-  loop drop bdrop xdrop ys> ;
-
 : bmiller \ u -- | -- f		u odd >3
   >bx bx xsi bx rs >zs bover bover
   bx pseudo1 ?dup
