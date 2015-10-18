@@ -674,11 +674,13 @@ variable foo
 
 : bgcd \ v u -- w	greatest common divisor
   br< if bswap then
+  br0= if bdrop exit then
   begin btuck bmod br0=
   until bdrop ;
 
 : gcd \ m n -- d
   2dup u< if swap then
+  ?dup 0= if exit then
   begin tuck 0 swap um/mod drop dup 0=
   until drop ;
 
