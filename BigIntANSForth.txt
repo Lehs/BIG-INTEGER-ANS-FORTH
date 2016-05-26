@@ -698,6 +698,7 @@ variable foo
 
 \ the square-and-multiply-algorithm with Barrett reduction 
 : b**mod \ u v m -- u^v mod m
+  bover bone b= if bnip bmod exit then
   >bar blog~ bswap >bx bone 0			\ 
   do i bits/mod cells second + @		\ 
      1 rot lshift and				\ 
